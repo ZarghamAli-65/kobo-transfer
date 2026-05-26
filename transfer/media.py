@@ -115,7 +115,7 @@ def get_clean_stats():
 
 
 def get_data_url(asset_uid, kf_url):
-    return f'{kf_url}/api/v2/assets/{asset_uid}/data'
+    return f'{kf_url}/api/v2/assets/{asset_uid}/data/'
 
 
 def get_filename(path):
