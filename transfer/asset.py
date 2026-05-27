@@ -34,7 +34,7 @@ def create_asset(config_dest, asset_setup_content):
     Create the `dest` asset, initially without content.
     '''
     res = requests.post(
-        url=config_dest['assets_url'] + '/',
+        url=config_dest['assets_url'],
         headers=config_dest['headers'],
         params=config_dest['params'],
         json=asset_setup_content,
@@ -60,7 +60,7 @@ def deploy_all_versions(config_src, config_dest, deployed_versions):
 
         # Patch this content to the `dest asset`
         res = requests.patch(
-            url=config_dest['asset_url'] + '/',
+            url=config_dest['asset_url'],
             headers=config_dest['headers'],
             params=config_dest['params'],
             json={"content": json.dumps(asset_content)},
