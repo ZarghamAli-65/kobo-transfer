@@ -66,7 +66,29 @@ def submit_data(xml_sub, _uuid, original_uuid, xml_value_media_map):
     for file_path in glob.glob(submission_attachments_path):
         filename = os.path.basename(file_path)
         filename_value = xml_value_media_map.get(filename)
+        print("Attachment:")
+        print(" filename =", filename)
+        print(" xml value =", filename_value)
+        print(" path =", file_path)
         files[filename_value] = (filename_value, open(file_path, 'rb'))
+
+    # print("\n========== SUBMISSION ==========")
+    # print("UUID:", _uuid)
+    # print("Destination URL:", config['submission_url'])
+    # print("Original UUID:", original_uuid)
+
+    # print("Files being sent:")
+    # for key in files:
+    #     print("  ", key)
+
+    # print("================================")
+
+    # print("\n========== XML ==========")
+    # try:
+    #     print(xml_sub.decode("utf-8"))
+    # except Exception:
+    #     print(xml_sub)
+    # print("=========================\n")
 
     res = requests.Request(
         method='POST',
@@ -76,8 +98,19 @@ def submit_data(xml_sub, _uuid, original_uuid, xml_value_media_map):
     )
     session = requests.Session()
     res = session.send(res.prepare())
-    return res.status_code
 
+    #to console status or to find errors
+    # print(f"\nStatus Code: {res.status_code}")
+
+    # try:
+    #     print("Status:", res.status_code)
+    #     print("Headers:", dict(res.headers))
+    #     print("Response:")
+    #     print(res.text)
+    # except Exception:
+    #     pass
+
+    return res.status_code
 
 def update_element_value(e, path, value):
     """
@@ -150,11 +183,30 @@ def transfer_submissions(all_submissions_xml, asset_data, quiet, regenerate):
             submission_xml, 'formhub/uuid', asset_data['formhub_uuid']
         )
 
+        # added this for editing in data
+        meta = submission_xml.find('meta')
+
+        if meta is not None:
+            root_uuid = meta.find('rootUuid')
+            deprecated_id = meta.find('deprecatedID')
+
+            if root_uuid is not None:
+                meta.remove(root_uuid)
+
+            if deprecated_id is not None:
+                meta.remove(deprecated_id)
+
         submission_values = get_all_values_from_xml(submission_xml)
         xml_value_media_map = get_xml_value_media_mapping(submission_values)
 
+        xml_bytes = ET.tostring(submission_xml)
+
+        # to get debug files
+        # with open(f"debug_{_uuid}.xml", "wb") as f:
+        #     f.write(xml_bytes)
+
         result = submit_data(
-            ET.tostring(submission_xml),
+            xml_bytes,
             _uuid,
             original_uuid,
             xml_value_media_map,
